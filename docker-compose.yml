@@ -1,55 +1,31 @@
-version: "2"
+version: "3"
 services:
-  postgres:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: postgres_password
-  redis:
-    image: redis
-  worker:
-    build:
-      context: ./worker
-      dockerfile: Dockerfile
-
-    volumes:
-      - /usr/app/node_modules
-      - ./worker:/usr/app
-
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-  api:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-
-    volumes:
-      - /usr/app/node_modules
-      - ./server:/usr/app
-
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DATABASE=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres_password
-
   client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-
+    image: "kodega2016/multi-client"
+    mem_limit: 128m
+    hostname: client
+  server:
+    image: "kodega2016/multi-server"
+    mem_limit: 128m
+    hostname: api
+    environment:
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+      - PGUSER=$PGUSER
+      - PGHOST=$PGHOST
+      - PGDATABASE=$PGDATABASE
+      - PGPASSWORD=$PGPASSWORD
+      - PGPORT=$PGPORT
+  worker:
+    image: "kodega2016/multi-worker"
+    mem_limit: 128m
+    hostname: worker
+    environment:
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
   nginx:
-    restart: always
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-
-    volumes:
-      - /usr/app/node_modules
-      - ./nginx:/usr/app
-
+    image: "kodega2016/multi-nginx"
+    mem_limit: 128m
+    hostname: nginx
     ports:
-      - 80:80
+      - "80:80"
