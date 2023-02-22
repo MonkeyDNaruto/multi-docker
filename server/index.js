@@ -49,9 +49,14 @@ pgClient.on("connect", (client) => {
 });
 
 (async () => {
-  await redisClient.connect();
-  await redisPublisher.connect();
-  await pgClient.connect();
+  try {
+    await redisClient.connect();
+    await redisPublisher.connect();
+    await pgClient.connect();
+    console.log("connected to databases")
+  } catch (e) {
+    console.log(e);
+  }
 })();
 
 app.get("/", (req, res) => {
